@@ -2083,15 +2083,15 @@ html[data-nav="small"] .sidebar-footer { padding-inline: 1.125rem; }
 }
 
 
-/* Text-only page navigation: keep the wide sidebar labels and replace page icons with names. */
+/* Keep page icons alongside their names in the wide sidebar. */
 html[data-nav="small"] { --sidebar-w: 220px; }
 html[data-nav="small"] .sidebar { width: 220px; min-width: 220px; flex: 0 0 220px; }
 .sidebar .nav-item {
   justify-content: flex-start;
-  gap: 0;
+  gap: .75rem;
   padding-inline: 1.125rem;
 }
-.sidebar .nav-item > svg { display: none; }
+.sidebar .nav-item > svg { display: inline-block; }
 .sidebar .nav-item .nav-label {
   display: inline-block;
   position: static;
