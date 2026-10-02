@@ -2081,3 +2081,35 @@ html[data-nav="small"] .sidebar-footer { padding-inline: 1.125rem; }
 @media (max-width: 42rem) {
   #dialer .dialer-input { width: auto; min-width: 0; max-width: none; }
 }
+
+
+/* Text-only page navigation: keep the wide sidebar labels and replace page icons with names. */
+html[data-nav="small"] { --sidebar-w: 220px; }
+html[data-nav="small"] .sidebar { width: 220px; min-width: 220px; flex: 0 0 220px; }
+.sidebar .nav-item {
+  justify-content: flex-start;
+  gap: 0;
+  padding-inline: 1.125rem;
+}
+.sidebar .nav-item > svg { display: none; }
+.sidebar .nav-item .nav-label {
+  display: inline-block;
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  opacity: 1;
+}
+html[data-nav="small"] .sidebar .nav-item .nav-label { display: inline-block; opacity: 1; }
+html[data-nav="small"] .sidebar-section-label { visibility: visible; }
+html[data-nav="small"] .sidebar-footer { padding-inline: 1.125rem; }
+
+/* One 8px gutter between the sidebar, panels, middle header, and cards. */
+#leadsPage.workspace { gap: 0; }
+#leadsPage .resizer { width: 8px; flex: 0 0 8px; margin: 0; }
+#leadsPage .detail { gap: 8px; }
+#leadsPage .detail-head { margin: 0; }
+#leadsPage .detail-body,
+#leadsPage .info-pair,
+#leadsPage .section-pair { gap: 8px; }
