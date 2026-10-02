@@ -1819,7 +1819,11 @@ body {
   .sidebar { width: var(--sidebar-w); flex: 0 0 var(--sidebar-w); border-radius: 16px; }
   .sidebar-section-label { visibility: visible; height: auto; padding: 1.25rem 1.125rem .375rem; }
   .nav-item { justify-content: flex-start; gap: .75rem; padding: .6875rem 1.125rem; }
-  .nav-item .nav-label { display: block; position: static; width: auto; height: auto; overflow: visible; }
+  .nav-item .nav-label {
+    display: block; position: static; width: auto; height: auto; overflow: visible;
+    clip: auto; clip-path: none; white-space: nowrap; opacity: 1;
+  }
+  .sidebar-user-text { display: block; opacity: 1; }
   .sidebar-status-dot { display: block; }
   .sidebar-user { width: calc(100% + 1rem); margin: -.375rem -.5rem; padding: .375rem .5rem; }
 
