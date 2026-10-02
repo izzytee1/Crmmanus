@@ -2023,3 +2023,61 @@ body {
   width: .75rem;
   height: .75rem;
 }
+
+
+/* Keep the full-width, text-labeled sidebar even when a compact preference was previously saved. */
+html[data-nav="small"] { --sidebar-w: 220px; }
+html[data-nav="small"] .sidebar { width: 220px; min-width: 220px; flex: 0 0 220px; }
+html[data-nav="small"] .nav-item {
+  justify-content: flex-start;
+  gap: .75rem;
+  padding-inline: 1.125rem;
+  overflow: hidden;
+}
+html[data-nav="small"] .nav-item .nav-label,
+html[data-nav="small"] .sidebar-user-text { display: block; opacity: 1; }
+html[data-nav="small"] .sidebar-section-label { visibility: visible; }
+html[data-nav="small"] :is(.nav-label, .sidebar-user-text, .sidebar-status-dot) { opacity: 1; }
+html[data-nav="small"] .sidebar-footer { padding-inline: 1.125rem; }
+
+/* The three-panel Company Info column follows the workspace's consistent 8px spacing. */
+#leadsPage .detail-body,
+#leadsPage .info-pair,
+#leadsPage .section-pair { gap: 8px; }
+
+/* Remove the decorative green top rule from the Dashboard's bottom team card. */
+#dashPage .db-section[data-tone="team"] { border-top: 0; }
+
+/* Dialer: restore the original source-file field sizing and typography. */
+#dialer .dialer-input {
+  width: 12ch;
+  min-width: initial;
+  max-width: initial;
+  flex: 0 0 auto;
+  height: 1.625rem;
+  padding: 0 6px;
+  border: 1px solid #C97B2A;
+  border-radius: 8px;
+  background: #07130B;
+  color: #35C94A;
+  -webkit-text-fill-color: #35C94A;
+  font-family: var(--font);
+  font-size: calc(.75rem * var(--crm-font-scale, 1));
+  font-weight: 700;
+  letter-spacing: 0;
+}
+#dialer .dialer-input:focus {
+  border-color: rgba(53,201,74,.7);
+  background: #0B1B10;
+  color: #35C94A;
+  -webkit-text-fill-color: #35C94A;
+}
+#dialer .dialer-input:disabled,
+#dialer .dialer-input[readonly] {
+  color: #35C94A;
+  opacity: 1;
+  -webkit-text-fill-color: #35C94A;
+}
+@media (max-width: 42rem) {
+  #dialer .dialer-input { width: auto; min-width: 0; max-width: none; }
+}
