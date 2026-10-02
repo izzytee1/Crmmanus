@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="css/settings.css">
   <link rel="stylesheet" href="css/search.css">
   <link rel="stylesheet" href="css/reminders.css">
-  <link rel="stylesheet" href="css/review-overrides.css?v=crm-review-28">
+  <link rel="stylesheet" href="css/review-overrides.css?v=crm-review-29">
   <script src="js/store-view.js"></script>
 </head>
 <body data-page="leads">
@@ -338,7 +338,7 @@
       <div class="sc-progress" id="scanProgress" hidden></div>
       <section class="sc-results" aria-labelledby="scanResultsTitle">
         <div class="panel-head sc-head" id="scanResultsHead"></div>
-        <div class="sc-grid-wrap scroll-always" id="scanResultsWrap"><table class="sg sc-freeze" id="scanTable" data-grid="results"></table></div>
+        <div class="sc-grid-wrap scroll-always" id="scanResultsWrap" role="region" tabindex="0" aria-label="Scanner results; scroll horizontally to view more columns"><table class="sg sc-freeze" id="scanTable" data-grid="results"></table></div>
       </section>
       <section class="sc-audit" id="scanAudit" aria-label="Scan audit" hidden>
         <button class="panel-head sc-audit-head" id="scanAuditHead" type="button" aria-expanded="false" aria-controls="scanAuditBody"></button>

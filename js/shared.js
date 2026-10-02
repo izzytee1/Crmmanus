@@ -322,11 +322,14 @@ function showPage(name) {
 // Clicking the logo switches the sidebar between full and icons only.
 // With icons only, a page's name shows when the mouse rests on its icon.
 function renderNav() {
-  const small = VIEW.get().nav === 'small';
+  const small = document.documentElement.dataset.nav === 'small';
   $('navToggle').setAttribute('aria-expanded', !small);
   document.querySelectorAll('.nav-item').forEach(b => small ? b.setAttribute('title', b.textContent.trim()) : b.removeAttribute('title'));
 }
-$('navToggle').addEventListener('click', () => VIEW.set({ nav: VIEW.get().nav === 'small' ? 'full' : 'small' }));
+$('navToggle').addEventListener('click', () => {
+  const small = document.documentElement.dataset.nav === 'small';
+  VIEW.set({ nav: small ? 'full' : 'small' });
+});
 addEventListener('viewchange', renderNav);
 renderNav();
 

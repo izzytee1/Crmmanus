@@ -467,7 +467,7 @@ const mail = (() => {
     fileUrls = [];
     const el = q$('gmRead'), t = ui.open && find(ui.open);
     q$('gmPanes').classList.toggle('reading', !!t);
-    if (!t) { el.innerHTML = splitMode() === 'none' ? '' : `<div class="gm-read-empty">${mi('mail', 48)}<div>No conversation selected</div></div>`; return; }
+    if (!t) { el.innerHTML = splitMode() === 'none' ? '' : `<div class="gm-read-empty">${mi('mail', 48)}<div>Select an email to read</div></div>`; return; }
     const msgs = shown(t), last = msgs[msgs.length - 1], a = account(t.account);
     const inbound = [...msgs].reverse().find(m => !m.out);
     const idea = !composers.inline && last && !last.out && !last.scheduledAt ? suggestReply({ kind: 'email', text: textOf(last.html), lead: leadByEmail(last.from.email) }) : '';

@@ -2036,8 +2036,8 @@ body {
 
 /* Dialer: restore the original source-file field sizing and typography. */
 #dialer .dialer-input {
-  width: 12ch;
-  min-width: initial;
+  width: 14ch;
+  min-width: 14ch;
   max-width: initial;
   flex: 0 0 auto;
   height: 1.625rem;
@@ -2065,7 +2065,7 @@ body {
   -webkit-text-fill-color: #35C94A;
 }
 @media (max-width: 42rem) {
-  #dialer .dialer-input { width: auto; min-width: 0; max-width: none; }
+  #dialer .dialer-input { width: 14ch; min-width: 14ch; max-width: none; }
 }
 
 
@@ -2077,3 +2077,29 @@ body {
 #leadsPage .detail-body,
 #leadsPage .info-pair,
 #leadsPage .section-pair { gap: 8px; }
+
+
+/* Keep narrow-screen navigation accessible while making the desktop workspace easier to reach. */
+/* The existing frozen Company column stays in place; make the Results scrollbar easier to find and focus. */
+#scanResultsWrap {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: auto;
+  scrollbar-color: #AAB4C4 #F1F3F7;
+}
+#scanResultsWrap:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: -2px; }
+#scanResultsWrap::-webkit-scrollbar { width: 10px; height: 10px; }
+#scanResultsWrap::-webkit-scrollbar-track { background: #F1F3F7; }
+#scanResultsWrap::-webkit-scrollbar-thumb { background: #AAB4C4; border: 2px solid #F1F3F7; border-radius: 6px; }
+
+/* Empty Team views show a concise state instead of an uninformative header-only table. */
+#dashPage .db-team-empty {
+  margin: 0;
+  padding: .25rem 0;
+  color: var(--text-muted);
+  font-size: calc(.75rem * var(--crm-font-scale, 1));
+}
+
+/* The two Campaign channels remain equal-width/equal-height, with their shared row sized to its content. */
+#campPage .cp-board { align-items: stretch; }
+#campPage .cp-channel { align-self: stretch; }

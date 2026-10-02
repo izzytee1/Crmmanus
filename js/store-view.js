@@ -21,6 +21,8 @@ const VIEW = (() => {
   // Screen size in inches → root font size in px (16 is the approved size).
   const SIZES = [[14, 14], [15.6, 14.5], [17, 15], [19, 15.5], [21.5, 16], [24, 16], [27, 17.5], [28, 18], [32, 19], [34, 20]];
   const STEP = .5, MIN_STEP = -4, MAX_STEP = 8, KEY = 'nv.view';
+  const NAV_EXPLICIT_KEY = 'nv.nav-explicit';
+  const navBreakpoint = matchMedia('(max-width: 80rem)');
   const valid = v => ({
     size: SIZES.some(([inches]) => inches === v.size) ? v.size : 'auto',
     step: Number.isFinite(v.step) ? Math.min(Math.max(Math.round(v.step / STEP) * STEP, MIN_STEP), MAX_STEP) : 0,
@@ -28,6 +30,7 @@ const VIEW = (() => {
     nav: v.nav === 'small' ? 'small' : 'full',
     lists: ['comfortable', 'compact'].includes(v.lists) ? v.lists : 'normal'
   });
+  let navExplicit = store.read(NAV_EXPLICIT_KEY, false) === true;
   let view = valid(store.read(KEY, {}));
 
   function apply() {
@@ -36,15 +39,26 @@ const VIEW = (() => {
     else root.removeProperty('--view-base');
     root.setProperty('--view-step', view.step + 'px');
     root.setProperty('--crm-font-scale', view.fontScale);
-    document.documentElement.dataset.nav = view.nav;
+    document.documentElement.dataset.nav = navBreakpoint.matches && !navExplicit ? 'small' : view.nav;
     document.documentElement.dataset.lists = view.lists;
   }
   function set(changes) {
+    if (Object.prototype.hasOwnProperty.call(changes, 'nav')) {
+      navExplicit = true;
+      store.write(NAV_EXPLICIT_KEY, true);
+    }
     view = valid({ ...view, ...changes });
     store.write(KEY, view);
     apply();
     dispatchEvent(new Event('viewchange'));
   }
+
+  const updateNavDefault = () => {
+    apply();
+    dispatchEvent(new Event('viewchange'));
+  };
+  if (navBreakpoint.addEventListener) navBreakpoint.addEventListener('change', updateNavDefault);
+  else navBreakpoint.addListener(updateNavDefault);
 
   addEventListener('keydown', e => {
     if (!(e.ctrlKey || e.metaKey) || e.altKey) return;

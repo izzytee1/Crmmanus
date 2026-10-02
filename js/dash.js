@@ -55,11 +55,11 @@ const dashboard = (() => {
     const rows = leads
       .filter(l => l.rep && l.rep !== user.name && (l.status === 'ENGAGED' || l.status === 'CONTRACT' || l.stage === 'closed-won'))
       .sort((a, b) => a.company.localeCompare(b.company));
+    if (!rows.length) return '<p class="db-team-empty">No team leads to show right now.</p>';
     const body = rows.map(l => {
       const closed = l.stage === 'closed-won', state = closed ? 'closed' : String(l.status || '').toLowerCase();
       return `<tr><td>${esc(l.company)}</td><td>${esc(l.rep)}</td><td><span class="db-team-status" data-state="${esc(state)}">${esc(closed ? 'Closed' : l.status)}</span></td></tr>`;
-    }).join('')
-      || '<tr><td colspan="3">No team leads.</td></tr>';
+    }).join('');
     return `<div class="db-table-wrap"><table class="db-table"><thead><tr><th>Company</th><th>Rep</th><th>Status</th></tr></thead><tbody>${body}</tbody></table></div>`;
   }
 

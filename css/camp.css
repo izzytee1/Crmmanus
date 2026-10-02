@@ -4,7 +4,7 @@
   padding: 0; background: transparent; overflow: hidden;
 }
 .cp-page[hidden], .cp-audience[hidden], .cp-card[hidden], .cp-review[hidden], .cp-run[hidden], .cp-templates[hidden], .cp-board[hidden] { display: none; }
-.cp-board { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cp-board { flex: 0 0 auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .cp-channel { min-width: 0; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 8px; padding: 16px; background: #fff; border: 1px solid var(--line); border-radius: 16px; }
 .cp-channel h2 { font-size: calc(1rem * var(--crm-font-scale, 1)); font-weight: 600; }
 .cp-field { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
