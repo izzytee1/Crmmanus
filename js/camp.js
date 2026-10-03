@@ -1391,7 +1391,10 @@ const campaign = (() => {
       ['October re-engagement', 'Email', '1,240', '38.4%', 'Running', 'live'],
       ['Offer follow-up · East', 'SMS', '486', '24.7%', 'Scheduled', 'scheduled'],
       ['Document reminder series', 'Email', '812', '31.2%', 'Completed', 'done'],
-      ['Renewal check-in', 'SMS', '264', '19.8%', 'Completed', 'done']
+      ['Renewal check-in', 'SMS', '264', '19.8%', 'Completed', 'done'],
+      ['Pre-approval check-in', 'SMS', '396', '18.6%', 'Completed', 'done'],
+      ['Monthly statement reminder', 'Email', '540', '27.1%', 'Completed', 'done'],
+      ['Application welcome series', 'Email', '688', '35.2%', 'Completed', 'done']
     ];
     $('campOverview').innerHTML = `
       <header class="ops-campaign-head"><div><span class="ops-eyebrow">SAMPLE CAMPAIGN DATA · PREVIEW ONLY</span><h2>Campaign pulse</h2><p>Illustrative delivery and engagement figures. This view does not send messages or create campaign records.</p></div><button class="btn primary" type="button" data-camp-screen="builder">Open campaign builder</button></header>
@@ -1420,10 +1423,12 @@ const campaign = (() => {
           </div>
         </section>
         <section class="ops-panel ops-insights" aria-label="Sample campaign insights">
-          <header class="ops-panel-head"><div><span class="ops-eyebrow">SAMPLE INSIGHTS</span><h3>Next best moves</h3></div><span class="ops-insight-count">03</span></header>
+          <header class="ops-panel-head"><div><span class="ops-eyebrow">SAMPLE INSIGHTS</span><h3>Next best moves</h3></div><span class="ops-insight-count">05</span></header>
           <div class="ops-insight-row"><span class="ops-insight-number">01</span><span><b>Revisit the 2-day follow-up</b><small>Sample replies peak 2–4 hours after delivery.</small></span><span class="ops-insight-arrow">↗</span></div>
           <div class="ops-insight-row"><span class="ops-insight-number">02</span><span><b>Prioritize warm conversations</b><small>126 sample replies are ready for a rep touch.</small></span><span class="ops-insight-arrow">↗</span></div>
           <div class="ops-insight-row"><span class="ops-insight-number">03</span><span><b>Keep the quiet window</b><small>Evening deliveries show lower engagement.</small></span><span class="ops-insight-arrow">↗</span></div>
+          <div class="ops-insight-row"><span class="ops-insight-number">04</span><span><b>Test concise subject lines</b><small>Shorter samples are opened more often on mobile.</small></span><span class="ops-insight-arrow">↗</span></div>
+          <div class="ops-insight-row"><span class="ops-insight-number">05</span><span><b>Protect list quality</b><small>Keep the sample suppression rate below 1%.</small></span><span class="ops-insight-arrow">↗</span></div>
         </section>
       </div>`;
   }

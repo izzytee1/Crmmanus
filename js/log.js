@@ -139,13 +139,24 @@ const activityLog = (() => {
     }
     return `<section class="al-week" aria-labelledby="logWeekTitle"><h3 class="section-title" id="logWeekTitle">This week</h3><ol class="al-days">${rows.join('')}</ol></section>`;
   }
+  function activityMixHtml(rep, all) {
+    const from = startOf(view.period), items = all.filter(a => a.by === rep && a.at >= from);
+    const rows = [
+      ['Calls', items.filter(a => a.kind === 'call').length, '#5276D6'],
+      ['Texts & WhatsApp', items.filter(a => a.kind === 'text' || a.kind === 'wa').length, '#269A7B'],
+      ['Email touchpoints', items.filter(a => a.kind === 'email' || a.kind === 'open').length, '#8876CE'],
+      ['Lead updates', items.filter(a => a.kind === 'lead').length, '#C78D43']
+    ];
+    const max = Math.max(1, ...rows.map(x => x[1]));
+    return `<section class="al-pulse" aria-label="Sample activity mix"><div class="al-pulse-head"><h3>Touchpoint mix</h3><span>PREVIEW DATA</span></div><div class="al-pulse-rows">${rows.map(([label, value, color]) => `<div class="al-pulse-row"><span>${label}</span><div><i style="width:${value ? Math.max(5, Math.round(value / max * 100)) : 0}%;background:${color}"></i></div><b>${value}</b></div>`).join('')}</div><p>Sample events are included for a fuller preview; they are not stored as CRM activity.</p></section>`;
+  }
   function renderTeam(all) {
     const every = allReps(), rep = view.rep || user.name;
     $('logTeamTitle').textContent = 'Summary';
     $('logRepField').hidden = !every;
     if (every) $('logRep').innerHTML = `<option value="">All reps</option>${repNames().map(r => `<option value="${esc(r)}"${r === view.rep ? ' selected' : ''}>${esc(person(r).full)}</option>`).join('')}`;
     $('logPeriod').querySelectorAll('[data-period]').forEach(b => { const on = b.dataset.period === view.period; b.setAttribute('aria-checked', on); b.tabIndex = on ? 0 : -1; });
-    $('logTeam').innerHTML = stripHtml(repStats(rep, all)) + hoursHtml(rep, all);
+    $('logTeam').innerHTML = stripHtml(repStats(rep, all)) + hoursHtml(rep, all) + activityMixHtml(rep, all);
   }
 
   // ── TIMELINE ──
@@ -170,7 +181,7 @@ const activityLog = (() => {
       const key = `${a.by}|${a.number}|${dayStart(a.at)}`, first = seen.get(key);
       if (first) first.times += 1; else { const row = { ...a, times: 1 }; seen.set(key, row); out.push(row); }
     });
-    return out.concat(demoEvents());
+    return out;
   }
   // One row per campaign. A rep's row covers only what went to their own leads.
   function campaignRows(from) {
