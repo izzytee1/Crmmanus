@@ -396,3 +396,14 @@
 #dashPage button:focus-visible,
 #campPage button:focus-visible,
 #logPage button:focus-visible { outline: 2px solid #5276D6; outline-offset: 2px; }
+
+
+/* Keep the app's page router authoritative: page-level display rules must never reveal hidden pages. */
+#dashPage[hidden],
+#campPage[hidden],
+#logPage[hidden] { display: none !important; }
+
+/* Preserve the desktop composition on phones and small screens; pan or zoom rather than stacking. */
+#dashPage.db-page,
+#campPage.cp-page,
+#logPage.workspace { min-width: 1100px; }
