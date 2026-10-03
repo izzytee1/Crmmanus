@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="css/reminders.css">
   <link rel="stylesheet" href="css/review-overrides.css?v=crm-review-29">
   <link rel="stylesheet" href="css/ops-redesign.css?v=crm-ops-6">
+  <link rel="stylesheet" href="css/three-workspaces.css?v=crm-workspace-1">
   <script src="js/store-view.js"></script>
 </head>
 <body data-page="leads">
@@ -259,6 +260,17 @@
           </div>
         </div>
         <div class="lead-list" id="leadList"></div>
+        <section class="lead-pulse" aria-label="Illustrative pipeline preview">
+          <div class="lead-pulse-head"><span>Pipeline snapshot</span><span class="lead-demo-tag">SAMPLE</span></div>
+          <div class="lead-pulse-total"><div><span>Illustrative pipeline</span><strong>$2.84M</strong></div><span class="lead-pulse-period">Demo preview</span></div>
+          <div class="lead-stage-rows" aria-label="Illustrative lead stages">
+            <div class="lead-stage-row"><span>New</span><i><b style="width:78%"></b></i><strong>08</strong></div>
+            <div class="lead-stage-row"><span>Contacted</span><i><b style="width:58%"></b></i><strong>12</strong></div>
+            <div class="lead-stage-row"><span>Engaged</span><i><b style="width:42%"></b></i><strong>07</strong></div>
+            <div class="lead-stage-row"><span>Contract</span><i><b style="width:24%"></b></i><strong>04</strong></div>
+          </div>
+          <p>Sample metrics only; the lead list above shows current CRM records.</p>
+        </section>
       </section>
       <div class="resizer" data-resize="leads" role="separator" aria-orientation="vertical" aria-label="Resize leads panel" tabindex="0"></div>
 
@@ -317,30 +329,47 @@
 
     <!-- ── SCANNER ── -->
     <main class="sc-page" id="scanPage" aria-label="Scanner" hidden>
-      <section class="sc-source" id="scanSource" aria-label="Files to scan"></section>
-      <input type="file" id="scanFiles" multiple accept=".zip,.pdf,.png,.jpg,.jpeg,.tif,.tiff,.webp,.heic,.bmp,.gif,application/zip,application/pdf,image/*" hidden>
-      <input type="file" id="scanFolder" webkitdirectory hidden>
-      <div class="sc-settings" role="group" aria-label="Scan settings">
-        <label class="sc-set">Regular scan pages<input id="setRegular" type="text" inputmode="numeric" autocomplete="off"></label>
-        <label class="sc-set">OCR scan pages<input id="setOcr" type="text" inputmode="numeric" autocomplete="off"></label>
-        <label class="sc-set">Revenue minimum<input id="setRevenue" class="sc-money-in" type="text" inputmode="decimal" autocomplete="off"></label>
-        <details class="sc-more" id="scanMore">
-          <summary class="sc-more-trigger" aria-label="More Scanner options" aria-expanded="false" aria-controls="scanMoreMenu"><svg class="mi" width="1rem" height="1rem" aria-hidden="true"><use href="#m-morehoriz"/></svg><span>More</span></summary>
-          <div class="sc-more-menu" id="scanMoreMenu" role="group" aria-label="Scanner options">
-            <button class="sc-more-item" id="scanHistoryBtn" type="button">History</button>
-            <button class="sc-more-item" id="scanTableSettings" type="button" data-menu="results" aria-haspopup="true" aria-expanded="false" aria-label="Table settings">Table settings</button>
-            <button class="sc-more-item" id="scanRescanAction" type="button" data-act="rescan" hidden></button>
-            <button class="sc-more-item" id="scanRetryAction" type="button" data-act="retry" hidden>Retry failed</button>
-            <button class="sc-more-item" id="scanNewBatchAction" type="button" data-act="new" hidden>New batch</button>
-            <span class="sc-more-meta" id="scanBatchMeta" hidden></span>
+      <div class="sc-workspace">
+        <aside class="sc-intake" aria-label="Scan setup">
+          <section class="sc-source" id="scanSource" aria-label="Files to scan"></section>
+          <input type="file" id="scanFiles" multiple accept=".zip,.pdf,.png,.jpg,.jpeg,.tif,.tiff,.webp,.heic,.bmp,.gif,application/zip,application/pdf,image/*" hidden>
+          <input type="file" id="scanFolder" webkitdirectory hidden>
+          <div class="sc-settings" role="group" aria-label="Scan settings">
+            <label class="sc-set">Regular scan pages<input id="setRegular" type="text" inputmode="numeric" autocomplete="off"></label>
+            <label class="sc-set">OCR scan pages<input id="setOcr" type="text" inputmode="numeric" autocomplete="off"></label>
+            <label class="sc-set">Revenue minimum<input id="setRevenue" class="sc-money-in" type="text" inputmode="decimal" autocomplete="off"></label>
+            <details class="sc-more" id="scanMore">
+              <summary class="sc-more-trigger" aria-label="More Scanner options" aria-expanded="false" aria-controls="scanMoreMenu"><svg class="mi" width="1rem" height="1rem" aria-hidden="true"><use href="#m-morehoriz"/></svg><span>More</span></summary>
+              <div class="sc-more-menu" id="scanMoreMenu" role="group" aria-label="Scanner options">
+                <button class="sc-more-item" id="scanHistoryBtn" type="button">History</button>
+                <button class="sc-more-item" id="scanTableSettings" type="button" data-menu="results" aria-haspopup="true" aria-expanded="false" aria-label="Table settings">Table settings</button>
+                <button class="sc-more-item" id="scanRescanAction" type="button" data-act="rescan" hidden></button>
+                <button class="sc-more-item" id="scanRetryAction" type="button" data-act="retry" hidden>Retry failed</button>
+                <button class="sc-more-item" id="scanNewBatchAction" type="button" data-act="new" hidden>New batch</button>
+                <span class="sc-more-meta" id="scanBatchMeta" hidden></span>
+              </div>
+            </details>
           </div>
-        </details>
+          <section class="sc-sample" aria-label="Illustrative extraction preview">
+            <div class="sc-sample-head"><div><span>PREVIEW DATA</span><h2>Example extraction</h2></div><span class="sc-sample-tag">Sample only</span></div>
+            <div class="sc-sample-company"><span>Business / bank package</span><strong>Northstar Equipment Co.</strong><small>5 illustrative documents</small></div>
+            <div class="sc-sample-metrics">
+              <div><span>App revenue</span><strong>$684,000</strong></div>
+              <div><span>Monthly deposits</span><strong>$142,800</strong></div>
+              <div><span>Indicative amount</span><strong>$250,000</strong></div>
+            </div>
+            <div class="sc-sample-docs"><span>3 statements</span><span>1 application</span><span>1 owner ID</span></div>
+            <p>Illustrative only. Live Results stay empty until files are scanned.</p>
+          </section>
+        </aside>
+        <section class="sc-output" aria-label="Scan output">
+          <div class="sc-progress" id="scanProgress" hidden></div>
+          <section class="sc-results" aria-labelledby="scanResultsTitle">
+            <div class="panel-head sc-head" id="scanResultsHead"></div>
+            <div class="sc-grid-wrap scroll-always" id="scanResultsWrap" role="region" tabindex="0" aria-label="Scanner results; scroll horizontally to view more columns"><table class="sg sc-freeze" id="scanTable" data-grid="results"></table></div>
+          </section>
+        </section>
       </div>
-      <div class="sc-progress" id="scanProgress" hidden></div>
-      <section class="sc-results" aria-labelledby="scanResultsTitle">
-        <div class="panel-head sc-head" id="scanResultsHead"></div>
-        <div class="sc-grid-wrap scroll-always" id="scanResultsWrap" role="region" tabindex="0" aria-label="Scanner results; scroll horizontally to view more columns"><table class="sg sc-freeze" id="scanTable" data-grid="results"></table></div>
-      </section>
       <section class="sc-audit" id="scanAudit" aria-label="Scan audit" hidden>
         <button class="panel-head sc-audit-head" id="scanAuditHead" type="button" aria-expanded="false" aria-controls="scanAuditBody"></button>
         <div class="sc-audit-body" id="scanAuditBody" hidden>
