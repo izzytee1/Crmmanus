@@ -423,3 +423,5 @@
 #logPage .al-pulse-row i { display: block; height: 100%; border-radius: inherit; }
 #logPage .al-pulse-row b { color: #4A5261; font-size: .64rem; font-weight: 650; text-align: right; }
 #logPage .al-pulse p { color: #8993A1; font-size: .56rem; line-height: 1.4; }
+
+#logPage .al-week { flex: 0 0 auto; }
