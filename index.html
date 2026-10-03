@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="css/search.css">
   <link rel="stylesheet" href="css/reminders.css">
   <link rel="stylesheet" href="css/review-overrides.css?v=crm-review-29">
+  <link rel="stylesheet" href="css/ops-redesign.css?v=crm-ops-1">
   <script src="js/store-view.js"></script>
 </head>
 <body data-page="leads">
@@ -354,7 +355,10 @@
 
     <!-- ── CAMPAIGN ── -->
     <main class="cp-page" id="campPage" aria-label="Campaign" hidden>
+      <section class="cp-overview" id="campOverview" aria-label="Sample campaign performance" hidden></section>
+      <div class="cp-builder" id="campBuilder" hidden>
       <div class="cp-top">
+        <button class="btn cp-overview-back" type="button" data-camp-screen="overview" aria-label="Return to campaign overview">Overview</button>
         <div class="seg" id="campType" role="radiogroup" aria-label="Campaign type">
           <button type="button" role="radio" data-type="email" data-key="type-email">Email</button>
           <button type="button" role="radio" data-type="sms" data-key="type-sms">SMS</button>
@@ -438,10 +442,12 @@
         </div>
       </aside>
       <div class="cp-menu" id="campMenu" role="group" hidden></div>
+      </div>
     </main>
 
     <!-- ── ACTIVITY LOG ── -->
     <main class="workspace" id="logPage" aria-label="Activity Log" hidden>
+      <section class="al-overview" id="logOverview" aria-label="Sample activity summary"></section>
       <section class="panel al-team" aria-labelledby="logTeamTitle">
         <div class="panel-head">
           <h2 class="panel-title" id="logTeamTitle"></h2>

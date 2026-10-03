@@ -99,7 +99,7 @@ const campaign = (() => {
     return { ...b, ...s, version: 2, filters, channels, schedule: { ...b.schedule, ...s.schedule } };
   }
   const draft = loadDraft();
-  const view = { list: 'selected', menu: '', menuButton: null, drawer: '', preview: null, dry: null, feed: 'all', feedQuery: '', frame: 0, tplOpen: false, tplId: '' };
+  const view = { screen: 'overview', list: 'selected', menu: '', menuButton: null, drawer: '', preview: null, dry: null, feed: 'all', feedQuery: '', frame: 0, tplOpen: false, tplId: '' };
   let ticker = 0;
 
   // ── HELPERS ──
@@ -861,6 +861,7 @@ const campaign = (() => {
 
   function openRecord(id) {
     const r = recordOf(id);
+    view.screen = 'builder';
     Object.assign(draft, { record: id, step: RUNNING.includes(r.status) ? 'live' : 'results' });
     setDrawer('', false);
     save();
@@ -1309,6 +1310,7 @@ const campaign = (() => {
 
   // One clock for the page: the scheduled-start countdowns and the Live timers. It runs only while one is on screen.
   function tick() {
+    if (view.screen === 'overview') { clearInterval(ticker); ticker = 0; return; }
     const els = page.hidden ? [] : page.querySelectorAll('[data-countdown], [data-clock], [data-next]');
     if (!els.length) { clearInterval(ticker); ticker = 0; return; }
     const r = draft.step === 'live' ? viewOf(activeRecord()) : null, t = r && timers(r);
@@ -1384,9 +1386,55 @@ const campaign = (() => {
     $('campCardSms').innerHTML = channelCard('sms');
   }
 
+  function renderOverview() {
+    const examples = [
+      ['October re-engagement', 'Email', '1,240', '38.4%', 'Running', 'live'],
+      ['Offer follow-up · East', 'SMS', '486', '24.7%', 'Scheduled', 'scheduled'],
+      ['Document reminder series', 'Email', '812', '31.2%', 'Completed', 'done'],
+      ['Renewal check-in', 'SMS', '264', '19.8%', 'Completed', 'done']
+    ];
+    $('campOverview').innerHTML = `
+      <header class="ops-campaign-head"><div><span class="ops-eyebrow">SAMPLE CAMPAIGN DATA · PREVIEW ONLY</span><h2>Campaign pulse</h2><p>Illustrative delivery and engagement figures. This view does not send messages or create campaign records.</p></div><button class="btn primary" type="button" data-camp-screen="builder">Open campaign builder</button></header>
+      <div class="ops-campaign-kpis">
+        <article class="ops-campaign-kpi"><span>Active campaigns</span><b>04</b><small><i class="ops-kpi-dot blue"></i>2 email · 2 SMS</small></article>
+        <article class="ops-campaign-kpi"><span>Delivered</span><b>18,420</b><small><i class="ops-kpi-dot teal"></i>96.8% delivery rate</small></article>
+        <article class="ops-campaign-kpi"><span>Engagement</span><b>32.6%</b><small><i class="ops-kpi-dot violet"></i>+4.2 pts vs. prior</small></article>
+        <article class="ops-campaign-kpi"><span>Attributed pipeline</span><b>$428K</b><small><i class="ops-kpi-dot amber"></i>Illustrative estimate</small></article>
+      </div>
+      <div class="ops-campaign-grid">
+        <section class="ops-panel ops-camp-trend" aria-label="Sample campaign engagement trend">
+          <header class="ops-panel-head"><div><span class="ops-eyebrow">LAST 8 WEEKS</span><h3>Delivery and engagement</h3></div><div class="ops-chart-legend"><span><i class="blue"></i>Delivered</span><span><i class="violet"></i>Engaged</span></div></header>
+          <div class="ops-campaign-chart"><svg viewBox="0 0 720 190" preserveAspectRatio="none" role="img" aria-label="Sample campaign delivery and engagement rise over eight weeks"><path class="ops-gridline" d="M0 24H720 M0 68H720 M0 112H720 M0 156H720"/><path d="M0 134 C74 128 84 100 158 106 S248 92 310 83 S412 99 472 64 S571 74 630 42 S679 51 720 26" fill="none" stroke="#4E76D7" stroke-width="3" stroke-linecap="round"/><path d="M0 158 C66 156 96 145 158 148 S252 127 310 134 S416 121 472 105 S575 116 630 88 S684 94 720 77" fill="none" stroke="#8A78D2" stroke-width="3" stroke-linecap="round"/><circle cx="720" cy="26" r="5" fill="#fff" stroke="#4E76D7" stroke-width="3"/><circle cx="720" cy="77" r="5" fill="#fff" stroke="#8A78D2" stroke-width="3"/></svg></div>
+          <div class="ops-chart-months"><span>Aug 10</span><span>Aug 17</span><span>Aug 24</span><span>Aug 31</span><span>Sep 7</span><span>Sep 14</span><span>Sep 21</span><span>Sep 28</span></div>
+          <div class="ops-campaign-trend-foot"><span>Delivered <b>18,420</b></span><span>Replies <b>2,184</b></span><span>Meetings <b>126</b></span><span>Opt-outs <b>0.4%</b></span></div>
+        </section>
+        <section class="ops-panel ops-channel-panel" aria-label="Sample channel mix">
+          <header class="ops-panel-head"><div><span class="ops-eyebrow">CHANNEL PERFORMANCE</span><h3>Channel mix</h3></div></header>
+          <div class="ops-channel-content"><div class="ops-donut" role="img" aria-label="Email is 68 percent and SMS is 32 percent of sample sends"><div><b>18.4K</b><small>sample sends</small></div></div><div class="ops-channel-legend"><div><i class="blue"></i><span>Email<small>12,526 sends</small></span><b>68%</b></div><div><i class="violet"></i><span>SMS<small>5,894 sends</small></span><b>32%</b></div></div></div>
+          <div class="ops-channel-note">Email reply rate <b>13.4%</b><span></span> SMS reply rate <b>8.1%</b></div>
+        </section>
+        <section class="ops-panel ops-campaign-list" aria-label="Sample recent campaigns">
+          <header class="ops-panel-head"><div><span class="ops-eyebrow">RECENT WORK</span><h3>Campaigns</h3></div><span class="ops-panel-note">All values are sample data</span></header>
+          <div class="ops-campaign-table"><div class="ops-campaign-table-head"><span>Campaign</span><span>Channel</span><span>Audience</span><span>Engagement</span><span>Status</span></div>
+            ${examples.map(([name, channel, audience, engagement, status, tone]) => `<div class="ops-campaign-row"><span><b>${name}</b><small>Created ${status === 'Running' ? 'today' : 'this week'}</small></span><span class="ops-channel-type" data-channel="${channel.toLowerCase()}">${channel}</span><span>${audience}</span><b>${engagement}</b><span class="ops-status-text" data-tone="${tone}"><i></i>${status}</span></div>`).join('')}
+          </div>
+        </section>
+        <section class="ops-panel ops-insights" aria-label="Sample campaign insights">
+          <header class="ops-panel-head"><div><span class="ops-eyebrow">SAMPLE INSIGHTS</span><h3>Next best moves</h3></div><span class="ops-insight-count">03</span></header>
+          <div class="ops-insight-row"><span class="ops-insight-number">01</span><span><b>Revisit the 2-day follow-up</b><small>Sample replies peak 2–4 hours after delivery.</small></span><span class="ops-insight-arrow">↗</span></div>
+          <div class="ops-insight-row"><span class="ops-insight-number">02</span><span><b>Prioritize warm conversations</b><small>126 sample replies are ready for a rep touch.</small></span><span class="ops-insight-arrow">↗</span></div>
+          <div class="ops-insight-row"><span class="ops-insight-number">03</span><span><b>Keep the quiet window</b><small>Evening deliveries show lower engagement.</small></span><span class="ops-insight-arrow">↗</span></div>
+        </section>
+      </div>`;
+  }
+
   function render() {
     closeMenu(false);
     checkStep();
+    const overview = view.screen === 'overview';
+    $('campOverview').hidden = !overview;
+    $('campBuilder').hidden = overview;
+    if (overview) renderOverview();
     $('campName').value = draft.name;
     $('campTouch').value = draft.filters.touch;
     $('campSearch').value = draft.filters.search;
@@ -1457,6 +1505,7 @@ const campaign = (() => {
   });
   $('campNew').addEventListener('click', () => {
     const start = () => {
+      view.screen = 'builder';
       Object.assign(draft, blankDraft(), { record: draft.record });
       Object.assign(view, { list: 'selected', dry: null });
       if (view.drawer) setDrawer('', false);
@@ -1513,6 +1562,16 @@ const campaign = (() => {
   // Any button that names a drawer opens or closes it. Any company name opens that lead.
   page.addEventListener('click', e => {
     if (e.target.closest('#campMoreMenu button')) more.open = false;
+    const screen = e.target.closest('[data-camp-screen]');
+    if (screen) {
+      view.screen = screen.dataset.campScreen === 'overview' ? 'overview' : 'builder';
+      render();
+      if (view.screen === 'builder') {
+        const current = $('campSteps').querySelector('[aria-current="step"]');
+        (current || (!$('campName').hidden ? $('campName') : null))?.focus();
+      }
+      return;
+    }
     const card = e.target.closest('[data-channel]');
     if (card) draft.type = card.dataset.channel;
     const b = e.target.closest('[data-drawer-open]'), lead = e.target.closest('[data-lead]');

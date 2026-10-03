@@ -1,138 +1,113 @@
-// ── DASHBOARD ──
-// The signed-in rep's real work for today, worked out from the lead list (leads). Every list below reads
-// real lead fields — status, lastActive, touch, bank, closeDate — and the rep's reminders. Nothing here is invented or made up.
-//
-// The signed-in rep is user. Team leads is the one card not limited to them: the other reps' ENGAGED,
-// CONTRACT and closed-won leads, with the company and rep name only, so nobody works a lead someone else has.
+// Dashboard: a presentation-only sample snapshot layered over the existing CRM records.
+// The demo figures below are never written to storage. Real lead links continue to open the existing records.
 const dashboard = (() => {
-  const DAY = 86400000;
-  // A close date ("Sep 30, 2026") starts at midnight Eastern.
-  const closeAt = l => { const d = new Date(l.closeDate); return isNaN(d) ? NaN : fromWall(d.getFullYear(), d.getMonth(), d.getDate()); };
-  const OPEN_TOUCH_STATES = ['opened', 'clicked'];
-  const CLOSED_STAGES = ['closed-won', 'closed-lost'];
-
-  const mine = () => leads.filter(l => l.rep === user.name);
-  const isOpenStage = l => !CLOSED_STAGES.includes(l.stage);
-  const daysQuiet = l => Math.floor((Date.now() - l.lastActive) / DAY);
-
-  // Engaged or under contract, but gone quiet for 3+ days. 6+ days is shown as urgent.
-  function stalled() {
-    return mine()
-      .filter(l => (l.status === 'ENGAGED' || l.status === 'CONTRACT') && daysQuiet(l) >= 3)
-      .sort((a, b) => daysQuiet(b) - daysQuiet(a));
+  const fallbackDeals = [
+    { company: 'Northstar Health', contact: 'Avery Wells', stage: 'Offer structuring', value: 318000, age: '12 min ago' },
+    { company: 'Alder & Finch Commerce', contact: 'Jordan Lee', stage: 'Underwriting', value: 275000, age: '48 min ago' },
+    { company: 'Juniper Works', contact: 'Maya Chen', stage: 'Terms sent', value: 192000, age: '2 hours ago' },
+    { company: 'Kite & Key Supply', contact: 'Riley Brooks', stage: 'Qualified', value: 146000, age: '3 hours ago' },
+    { company: 'Solstice Fabrication', contact: 'Drew Park', stage: 'Initial review', value: 98000, age: '5 hours ago' }
+  ];
+  const stageData = [
+    ['Qualified', 34, 56, '#5276D6'],
+    ['Underwriting', 26, 42, '#4B91C1'],
+    ['Offer sent', 18, 30, '#36A58A'],
+    ['Contracting', 13, 21, '#8D7BD2'],
+    ['Funded', 9, 15, '#D49A54']
+  ];
+  const trendPoints = '0,138 70,129 140,135 210,104 280,112 350,84 420,92 490,55 560,65 630,28 700,38';
+  const greeting = () => {
+    const h = new Date().getHours();
+    return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  };
+  const spark = (values, tone = 'blue') => {
+    const max = Math.max(...values), min = Math.min(...values), span = max - min || 1;
+    const points = values.map((v, i) => `${(i / (values.length - 1)) * 100},${27 - ((v - min) / span) * 21}`).join(' ');
+    return `<svg class="ops-spark ${tone}" viewBox="0 0 100 32" aria-hidden="true"><polyline points="${points}"/></svg>`;
+  };
+  function dealRows() {
+    const actual = [...leads].sort((a, b) => (b.value || 0) - (a.value || 0)).slice(0, 5);
+    return fallbackDeals.map((sample, i) => {
+      const lead = actual[i];
+      return lead ? { ...sample, lead, company: lead.company, contact: fullName(lead) || sample.contact, value: lead.value || sample.value } : sample;
+    });
   }
-  // Still NEW — no real outreach has started yet. Newest application first.
-  function untouched() {
-    return mine().filter(l => l.status === 'NEW').sort((a, b) => new Date(b.applied) - new Date(a.applied));
-  }
-  // An email or text was opened, but nothing came back.
-  function openedNoReply() {
-    return mine().filter(l => Object.values(l.touch || {}).some(t => OPEN_TOUCH_STATES.includes(t.state)));
-  }
-  // Still open, with a close date in the next 7 days.
-  function closingSoon() {
-    const now = Date.now(), soon = now + 7 * DAY;
-    return mine()
-      .filter(isOpenStage)
-      .map(l => ({ l, t: closeAt(l) }))
-      .filter(x => x.t && x.t >= now && x.t <= soon)
-      .sort((a, b) => a.t - b.t)
-      .map(x => x.l);
-  }
-  // NEW or ATTEMPTED, with a real bank statement on file, ranked by revenue plus ending balance.
-  function worthPursuing() {
-    return mine()
-      .filter(l => l.bank && (l.status === 'NEW' || l.status === 'ATTEMPTED'))
-      .sort((a, b) => (b.value + b.bank.balance) - (a.value + a.bank.balance))
-      .slice(0, 5);
-  }
-  // A real bank statement showing 3+ NSFs, or obligations at half or more of deposits.
-  function riskFlags() {
-    return mine().filter(l => l.bank && (l.bank.nsf >= 3 || l.bank.obligations >= l.bank.deposits * 0.5));
-  }
-  // The other reps' leads in three groups. Each lead is in one group: closed-won first, then CONTRACT, then ENGAGED.
-  function teamTable() {
-    const rows = leads
-      .filter(l => l.rep && l.rep !== user.name && (l.status === 'ENGAGED' || l.status === 'CONTRACT' || l.stage === 'closed-won'))
-      .sort((a, b) => a.company.localeCompare(b.company));
-    if (!rows.length) return '<p class="db-team-empty">No team leads to show right now.</p>';
-    const body = rows.map(l => {
-      const closed = l.stage === 'closed-won', state = closed ? 'closed' : String(l.status || '').toLowerCase();
-      return `<tr><td>${esc(l.company)}</td><td>${esc(l.rep)}</td><td><span class="db-team-status" data-state="${esc(state)}">${esc(closed ? 'Closed' : l.status)}</span></td></tr>`;
-    }).join('');
-    return `<div class="db-table-wrap"><table class="db-table"><thead><tr><th>Company</th><th>Rep</th><th>Status</th></tr></thead><tbody>${body}</tbody></table></div>`;
-  }
-
-  function totals(stalledCount) {
-    const open = mine().filter(isOpenStage);
-    const pipelineValue = open.reduce((sum, l) => sum + l.value, 0);
-    const now = wall();
-    const inThisMonth = l => { const t = closeAt(l); return !isNaN(t) && wall(t).y === now.y && wall(t).mo === now.mo; };
-    return {
-      pipelineValue,
-      closingThisMonth: open.filter(inThisMonth).length,
-      winsThisMonth: mine().filter(l => l.stage === 'closed-won' && inThisMonth(l)).length,
-      stalledCount
-    };
-  }
-
-  function row(l, meta, sub) {
-    return `<div class="db-row">
-      <span class="db-row-top"><span><span class="db-row-company">${esc(l.company)}</span><button class="open-record" type="button" data-lead="${l.id}" title="Open record" aria-label="Open ${esc(l.company)} in Leads">${ic('open', 12)}</button></span><span class="db-row-meta">${meta}</span></span>
-      <span class="db-row-sub">${esc(sub)}</span>
-    </div>`;
-  }
-  function card(icon, title, list, emptyText, mapRow) {
-    return `<section class="db-card" aria-label="${esc(title)}">
-      <div class="db-card-head">${ic(icon, 14)}<h3>${title}</h3><span class="db-count">${list.length}</span></div>
-      <div class="db-list">${list.length ? list.map(mapRow).join('') : `<p class="empty db-empty">${esc(emptyText)}</p>`}</div>
-    </section>`;
-  }
-  // Three groups, each with its own colour: what needs attention, where the chances are, and the team.
-  const group = (tone, title, cards) => `<section class="db-section" data-tone="${tone}" aria-label="${title}"><h3 class="db-section-title">${title}</h3><div class="db-grid">${cards.join('')}</div></section>`;
-  const greeting = () => { const h = wall().h; return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; };
-
   function render() {
-    const stalledList = stalled(), t = totals(stalledList.length);
-
-    $('dbHello').textContent = `${greeting()}, ${user.name}`;
-    $('dbDate').textContent = showTime(Date.now(), { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    const stats = [
-      { icon: 'layers', label: 'Open pipeline value', val: money(t.pipelineValue) },
-      { icon: 'calendar', label: 'Closing this month', val: t.closingThisMonth },
-      { icon: 'check', label: 'Wins this month', val: t.winsThisMonth },
-      { icon: 'clock', label: 'Stalled leads', val: t.stalledCount, warn: t.stalledCount > 0 }
+    const stamp = showTime(Date.now(), { weekday: 'long', month: 'long', day: 'numeric' });
+    $('dbHello').innerHTML = `<span class="ops-greeting">${greeting()}, ${esc(user.name)}</span><span class="ops-sample-flag">DEMO DATA</span>`;
+    $('dbDate').textContent = `${stamp} · sample portfolio snapshot`;
+    const kpis = [
+      { label: 'Open pipeline', value: '$2.86M', delta: '+18.2%', note: 'vs. prior month', tone: 'blue', values: [5, 7, 6, 10, 9, 13, 16] },
+      { label: 'Qualified deals', value: '42', delta: '+12.5%', note: '8 added this week', tone: 'teal', values: [4, 5, 5, 8, 7, 10, 13] },
+      { label: 'Approval volume', value: '$684K', delta: '+9.4%', note: '6 offers in review', tone: 'violet', values: [4, 6, 5, 7, 8, 8, 11] },
+      { label: 'Contact to offer', value: '31.8%', delta: '+3.1 pts', note: 'target 30%', tone: 'amber', values: [4, 4, 6, 5, 8, 9, 12] }
     ];
-    const statHtml = s => `<div class="db-stat${s.warn ? ' warn' : ''}"><div class="db-stat-label">${ic(s.icon, 13)}${s.label}</div><div class="db-stat-val">${s.val}</div></div>`;
-    $('dbStats').innerHTML = `<div class="db-stat-group">${stats.slice(0, 2).map(statHtml).join('')}</div><div class="db-stat-group">${stats.slice(2).map(statHtml).join('')}</div>`;
+    $('dbStats').innerHTML = kpis.map(k => `<article class="ops-kpi ${k.tone}">
+      <div class="ops-kpi-top"><span>${k.label}</span><span class="ops-kpi-mark" aria-hidden="true"></span></div>
+      <div class="ops-kpi-value">${k.value}</div>
+      <div class="ops-kpi-bottom"><span class="ops-kpi-delta">${k.delta}</span><span>${k.note}</span>${spark(k.values, k.tone)}</div>
+    </article>`).join('');
 
-    $('dbGrid').innerHTML = [
-      group('attention', 'Needs attention', [
-        card('calendar', 'Follow-ups due', reminders.dueToday(), 'No follow-ups due today.', r =>
-          row(reminders.leadOf(r), `<span class="db-quiet${r.at <= Date.now() ? ' urgent' : ''}">${esc(reminders.whenText(r))}</span>`, r.text)),
-        card('clock', 'Stalled leads', stalledList, 'No stalled leads right now.', l =>
-          row(l, `<span class="db-quiet${daysQuiet(l) >= 6 ? ' urgent' : ''}">${daysQuiet(l)}d quiet</span>`, `${fullName(l)} · ${l.status}`)),
-        card('alert', 'Risk flags', riskFlags(), 'No risk flags right now.', l =>
-          row(l, l.bank.nsf >= 3 ? `${l.bank.nsf} NSF` : 'High obligations', `Balance ${money(l.bank.balance)}`))
-      ]),
-      group('chances', 'Opportunities', [
-        card('user', 'New, untouched', untouched(), 'No new leads waiting.', l =>
-          row(l, money(l.value), `${fullName(l)} · applied ${l.applied ? fmtDate(l.applied) : '—'}`)),
-        card('mailopen', 'Opened, no reply', openedNoReply(), 'Nothing opened without a reply.', l =>
-          row(l, timeAgo(l.lastActive), fullName(l))),
-        card('calendar', 'Closing soon', closingSoon(), 'Nothing closing in the next 7 days.', l =>
-          row(l, l.closeDate, `${money(l.value)} · ${l.stage}`)),
-        card('star', 'Worth pursuing', worthPursuing(), 'No strong untouched leads right now.', l =>
-          row(l, money(l.value), `Ending balance ${money(l.bank.balance)}`))
-      ]),
-      `<section class="db-section" data-tone="team" aria-label="Team"><h3 class="db-section-title">Team</h3>${teamTable()}</section>`
-    ].join('');
+    const deals = dealRows();
+    const opportunityHtml = deals.map((d, i) => {
+      const name = d.lead
+        ? `<button class="ops-company-link" type="button" data-lead="${d.lead.id}" aria-label="Open ${esc(d.company)} in Leads">${esc(d.company)}</button>`
+        : `<span class="ops-company-name">${esc(d.company)}</span>`;
+      const stage = d.lead ? ['Underwriting', 'Terms sent', 'Qualified', 'Offer sent', 'Review'][i % 5] : d.stage;
+      return `<div class="ops-deal-row">
+        <div class="ops-deal-primary"><span class="ops-rank">0${i + 1}</span><div>${name}<small>${esc(d.contact)}</small></div></div>
+        <span class="ops-stage-text" data-stage="${i % 5}">${stage}</span>
+        <b class="ops-deal-value">${money(d.value)}</b>
+        <span class="ops-deal-age">${d.age}</span>
+      </div>`;
+    }).join('');
+
+    const reps = [...new Set([user.name, ...repNames()])];
+    ['Maya Chen', 'David Ruiz', 'Jordan Lee', 'Taylor Nguyen'].forEach(n => { if (reps.length < 4 && !reps.includes(n)) reps.push(n); });
+    const team = reps.slice(0, 4).map((name, i) => {
+      const progress = [86, 73, 64, 51][i];
+      return `<div class="ops-team-row"><div class="ops-person"><span class="ops-avatar" aria-hidden="true">${esc(name.split(/\s+/).map(p => p[0]).slice(0, 2).join(''))}</span><span><b>${esc(name)}</b><small>${['Portfolio lead', 'Senior rep', 'Account executive', 'Account executive'][i]}</small></span></div><div class="ops-target"><span><b>${[18, 15, 12, 9][i]}</b> / ${[21, 18, 17, 16][i]} target</span><span class="ops-progress"><i style="width:${progress}%"></i></span></div><strong>${progress}%</strong></div>`;
+    }).join('');
+
+    $('dbGrid').innerHTML = `
+      <section class="ops-panel ops-trend" aria-label="Sample pipeline trend">
+        <header class="ops-panel-head"><div><span class="ops-eyebrow">6 MONTH VIEW</span><h3>Pipeline momentum</h3></div><div class="ops-trend-total"><b>$2.86M</b><span>+18.2% <small>period over period</small></span></div></header>
+        <div class="ops-trend-chart"><div class="ops-axis-labels"><span>$3.0M</span><span>$2.0M</span><span>$1.0M</span><span>$0</span></div><svg viewBox="0 0 700 170" preserveAspectRatio="none" role="img" aria-label="Mock pipeline value rises steadily over six months">
+          <defs><linearGradient id="opsDashFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5276D6" stop-opacity=".24"/><stop offset="1" stop-color="#5276D6" stop-opacity="0"/></linearGradient></defs>
+          <path class="ops-gridline" d="M0 20H700 M0 60H700 M0 100H700 M0 140H700"/>
+          <polygon points="${trendPoints} 700,165 0,165" fill="url(#opsDashFill)"/>
+          <polyline points="${trendPoints}" fill="none" stroke="#5276D6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="700" cy="38" r="5" fill="#fff" stroke="#5276D6" stroke-width="3"/>
+        </svg></div>
+        <div class="ops-chart-months"><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span></div>
+      </section>
+      <section class="ops-panel ops-stage-panel" aria-label="Sample portfolio by stage">
+        <header class="ops-panel-head"><div><span class="ops-eyebrow">CURRENT MIX</span><h3>Portfolio by stage</h3></div><span class="ops-inline-total">124 <small>deals</small></span></header>
+        <div class="ops-stage-list">${stageData.map(([label, pct, count, color]) => `<div class="ops-stage-row"><div class="ops-stage-meta"><span>${label}</span><b>${count}<small> deals</small></b></div><div class="ops-stage-track"><i style="width:${pct}%;background:${color}"></i></div><span class="ops-stage-pct">${pct}%</span></div>`).join('')}</div>
+        <div class="ops-stage-foot"><span>Weighted pipeline</span><b>$1.94M</b></div>
+      </section>
+      <section class="ops-panel ops-opportunities" aria-label="Sample priority opportunities">
+        <header class="ops-panel-head"><div><span class="ops-eyebrow">NEXT BEST ACTION</span><h3>Priority opportunities</h3></div><span class="ops-panel-note">Sorted by estimated value</span></header>
+        <div class="ops-deal-table"><div class="ops-deal-head"><span>Company / contact</span><span>Stage</span><span>Requested</span><span>Activity</span></div>${opportunityHtml}</div>
+      </section>
+      <section class="ops-panel ops-team-panel" aria-label="Sample team performance">
+        <header class="ops-panel-head"><div><span class="ops-eyebrow">SAMPLE SCORECARD</span><h3>Team pace</h3></div><span class="ops-panel-note">October goal</span></header>
+        <div class="ops-team-list">${team}</div>
+      </section>
+      <section class="ops-panel ops-activity-panel" aria-label="Sample recent activity">
+        <header class="ops-panel-head"><div><span class="ops-eyebrow">RECENT TOUCHPOINTS</span><h3>Activity stream</h3></div><span class="ops-live-mark"><i></i> Preview</span></header>
+        <div class="ops-activity-list">
+          <div class="ops-activity-row"><span class="ops-activity-icon blue">↗</span><span><b>Terms sent</b><small>Meridian Capital · James Liao</small></span><time>9 min</time></div>
+          <div class="ops-activity-row"><span class="ops-activity-icon teal">✓</span><span><b>Documents received</b><small>QuantumBridge · David Ruiz</small></span><time>32 min</time></div>
+          <div class="ops-activity-row"><span class="ops-activity-icon violet">✉</span><span><b>Reply received</b><small>Vertex Systems · Nathan Kim</small></span><time>1 hr</time></div>
+          <div class="ops-activity-row"><span class="ops-activity-icon amber">＋</span><span><b>New application</b><small>Northstar Health · Avery Wells</small></span><time>2 hr</time></div>
+        </div>
+      </section>`;
   }
 
   $('dbGrid').addEventListener('click', e => {
     const b = e.target.closest('[data-lead]');
     if (b) openLead(Number(b.dataset.lead));
   });
-
   return { render };
 })();

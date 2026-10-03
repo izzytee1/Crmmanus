@@ -46,7 +46,7 @@ const activityLog = (() => {
     });
     leads.filter(l => l.custom).forEach(l => out.push({ kind: 'lead', by: l.addedBy || l.rep, at: l.id, leadId: l.id }));
     week.actions.forEach(a => out.push({ kind: a.kind, by: a.rep, at: a.at, leadId: a.leadId }));
-    return out;
+    return out.concat(demoEvents());
   }
 
   // Minutes of real work: actions closer than IDLE minutes join up, and a call counts for its whole length.
@@ -95,7 +95,26 @@ const activityLog = (() => {
   }
 
   // ── TEAM PANEL ──
-  const where = a => a ? (leadOf(a.leadId) || {}).company || (a.number ? fmtPhone(a.number) : a.to) || '—' : '';
+  const where = a => a ? a.company || (leadOf(a.leadId) || {}).company || (a.number ? fmtPhone(a.number) : a.to) || '—' : '';
+  function demoEvents() {
+    const now = Date.now();
+    const actors = allReps() ? [...new Set([user.name, ...repNames()])] : [user.name];
+    const examples = [
+      { kind: 'call', ago: 4, company: 'Meridian Capital', dir: 'out', secs: 482 },
+      { kind: 'text', ago: 11, company: 'QuantumBridge', text: 'Confirmed the document package is on its way.' },
+      { kind: 'email', ago: 19, company: 'Vertex Systems', subject: 'Updated offer terms for review' },
+      { kind: 'call', ago: 28, company: 'Northstar Health', dir: 'in', secs: 326 },
+      { kind: 'open', ago: 41, company: 'Juniper Works', subject: 'Your funding options', count: 2 },
+      { kind: 'lead', ago: 53, company: 'Alder & Finch Commerce' },
+      { kind: 'wa', ago: 68, company: 'Solstice Fabrication', text: 'Thanks — I can make time tomorrow morning.' },
+      { kind: 'email', ago: 81, company: 'Kite & Key Supply', subject: 'Bank statement checklist' },
+      { kind: 'call', ago: 94, company: 'Harborline Freight', dir: 'out', secs: 715 },
+      { kind: 'text', ago: 108, company: 'Cedar Point Dental', text: 'Application received. I will send the next steps shortly.' },
+      { kind: 'open', ago: 123, company: 'Meridian Capital', subject: 'Revised approval summary', count: 3 },
+      { kind: 'call', ago: 139, company: 'Lumenstone Foods', dir: 'out', secs: 251 }
+    ];
+    return examples.map((a, i) => ({ ...a, by: actors[i % Math.max(actors.length, 1)] || user.name, at: now - a.ago * MIN, demo: true }));
+  }
   function stripHtml(st) {
     const p = person(st.rep);
     const metric = (n, label) => `<div><b>${n}</b><span>${label}</span></div>`;
@@ -151,7 +170,7 @@ const activityLog = (() => {
       const key = `${a.by}|${a.number}|${dayStart(a.at)}`, first = seen.get(key);
       if (first) first.times += 1; else { const row = { ...a, times: 1 }; seen.set(key, row); out.push(row); }
     });
-    return out;
+    return out.concat(demoEvents());
   }
   // One row per campaign. A rep's row covers only what went to their own leads.
   function campaignRows(from) {
@@ -170,7 +189,7 @@ const activityLog = (() => {
   function rowHtml(a, showRep) {
     const title = a.kind === 'campaign' ? a.name : where(a), line = a.kind === 'campaign' ? a.line : LINES[a.kind](a);
     const record = leadOf(a.leadId) ? `<button class="open-record" type="button" data-lead="${a.leadId}" title="Open record" aria-label="Open ${esc(title)} in Leads">${ic('open', 12)}</button>` : '';
-    const body = `<span class="al-event-dot" aria-hidden="true"></span><span class="al-row-main"><b>${esc(title)}</b>${record}<span>${esc(line)}</span></span>
+    const body = `<span class="al-event-dot" aria-hidden="true"></span><span class="al-row-main"><b>${esc(title)}${a.demo ? '<span class="al-demo-label">SAMPLE</span>' : ''}</b>${record}<span>${esc(line)}</span></span>
       <span class="al-row-side"><span>${clockTime(a.at)}</span>${showRep ? `<span>${esc(a.by || 'No rep')}</span>` : ''}</span>`;
     return a.kind === 'campaign' ? `<button class="al-row" type="button" data-kind="${a.kind}" data-camp="${esc(a.id)}">${body}</button>`
       : `<div class="al-row" data-kind="${a.kind}">${body}</div>`;
@@ -194,8 +213,20 @@ const activityLog = (() => {
       : `No activity ${view.period === 'today' ? 'today' : 'this week'} yet.${last ? `<br>Last activity: ${when(last, true)}.` : ''}`}</p>`;
   }
 
+  function renderOverview(all) {
+    const from = startOf(view.period);
+    const scoped = all.filter(a => LINES[a.kind] && (allReps() ? (!view.rep || a.by === view.rep) : a.by === user.name) && a.at >= from);
+    const calls = scoped.filter(a => a.kind === 'call').length;
+    const conversations = new Set(scoped.map(a => a.company || a.leadId).filter(Boolean)).size;
+    const outreach = scoped.filter(a => ['text', 'wa', 'email'].includes(a.kind)).length;
+    const demos = scoped.filter(a => a.demo).length;
+    $('logOverview').innerHTML = `<div class="ops-log-intro"><span class="ops-eyebrow">SAMPLE ACTIVITY · PREVIEW DATA</span><strong>Work pulse</strong><small>Illustrative interactions are marked SAMPLE and never saved as CRM records.</small></div>
+      <div class="ops-log-metrics"><article><span>Interactions</span><b>${scoped.length}</b><small>${view.period === 'today' ? 'Today' : 'This week'}</small></article><article><span>Calls completed</span><b>${calls}</b><small>Including sample calls</small></article><article><span>Messages & email</span><b>${outreach}</b><small>Touchpoints in view</small></article><article><span>Companies touched</span><b>${conversations}</b><small>${demos} sample events included</small></article></div>`;
+  }
+
   function render() {
     const all = actions();
+    renderOverview(all);
     renderTeam(all);
     renderTimeline(all);
   }
