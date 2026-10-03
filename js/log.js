@@ -148,7 +148,8 @@ const activityLog = (() => {
       ['Lead updates', items.filter(a => a.kind === 'lead').length, '#C78D43']
     ];
     const max = Math.max(1, ...rows.map(x => x[1]));
-    return `<section class="al-pulse" aria-label="Sample activity mix"><div class="al-pulse-head"><h3>Touchpoint mix</h3><span>PREVIEW DATA</span></div><div class="al-pulse-rows">${rows.map(([label, value, color]) => `<div class="al-pulse-row"><span>${label}</span><div><i style="width:${value ? Math.max(5, Math.round(value / max * 100)) : 0}%;background:${color}"></i></div><b>${value}</b></div>`).join('')}</div><p>Sample events are included for a fuller preview; they are not stored as CRM activity.</p></section>`;
+    const cadence = [['M', 42], ['T', 66], ['W', 51], ['T', 82], ['F', 71], ['S', 38], ['S', 57]];
+    return `<section class="al-pulse" aria-label="Sample activity mix"><div class="al-pulse-head"><h3>Touchpoint mix</h3><span>PREVIEW DATA</span></div><div class="al-pulse-rows">${rows.map(([label, value, color]) => `<div class="al-pulse-row"><span>${label}</span><div><i style="width:${value ? Math.max(5, Math.round(value / max * 100)) : 0}%;background:${color}"></i></div><b>${value}</b></div>`).join('')}</div><div class="al-cadence"><div class="al-cadence-head"><b>Weekly cadence</b><span>Illustrative volume</span></div><div class="al-cadence-chart" role="img" aria-label="Illustrative activity volume from Monday through Sunday">${cadence.map(([day, value]) => `<div class="al-cadence-day"><i style="height:${value}%"></i><small>${day}</small></div>`).join('')}</div></div><p>Sample events are included for a fuller preview; they are not stored as CRM activity.</p></section>`;
   }
   function renderTeam(all) {
     const every = allReps(), rep = view.rep || user.name;
